@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +12,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#0f172a;color:#fff;text-align:center}
 
-/* HEADER */
 header{
 display:flex;justify-content:space-between;align-items:center;
 padding:12px;background:#1e293b;position:sticky;top:0;z-index:1000;
@@ -20,12 +20,10 @@ padding:12px;background:#1e293b;position:sticky;top:0;z-index:1000;
 .logo{display:flex;align-items:center;gap:10px;font-weight:bold;}
 .logo img{width:45px;height:45px;border-radius:50%}
 
-/* MENU */
 nav a{color:#fff;text-decoration:none;margin:0 10px;}
 nav a:hover{color:#22d3ee}
 .hamburger{display:none;font-size:26px;cursor:pointer;}
 
-/* HERO */
 .hero{
 background:url("poster.jpg") center/cover no-repeat;
 padding:100px 20px;position:relative;
@@ -36,19 +34,14 @@ background:rgba(0,0,0,0.6);
 }
 .hero h1,.hero p{position:relative;z-index:1;}
 
-/* CONTAINER */
 .container{max-width:1000px;margin:auto;padding:20px}
-
-/* CARD */
 .card{background:#1e293b;padding:20px;border-radius:12px;margin:20px auto}
 
-/* INPUT */
 input,select{
 width:90%;padding:10px;margin:8px auto;border-radius:8px;border:none;
 display:block;
 }
 
-/* FILE UPLOAD */
 .fileUpload{
 border:2px dashed #22d3ee;
 padding:15px;
@@ -59,13 +52,11 @@ width:90%;
 display:block;
 }
 
-/* BUTTON */
 button{
 padding:10px;border:none;border-radius:8px;
 background:#22d3ee;cursor:pointer;font-weight:bold;margin:6px;
 }
 
-/* MODAL */
 .modal{
 display:none;position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,0.6);justify-content:center;align-items:center;
@@ -82,7 +73,6 @@ max-height:90vh;
 overflow-y:auto;
 }
 
-/* FOOTER */
 footer{
 background:#1e293b;
 margin-top:30px;
@@ -90,7 +80,6 @@ padding:20px;
 color:#ccc;
 }
 
-/* MOBILE */
 @media(max-width:768px){
 nav{display:none;flex-direction:column;background:#1e293b;
 position:absolute;top:60px;right:10px;padding:10px;border-radius:10px;}
@@ -155,7 +144,7 @@ nav.active{display:flex}
 
 </div>
 
-<!-- TRACK MODAL -->
+<!-- TRACK -->
 <div id="trackModal" class="modal">
 <div class="modal-content">
 <h2>📦 Track Order</h2>
@@ -191,9 +180,16 @@ nav.active{display:flex}
 
 <script>
 
-let orders = JSON.parse(localStorage.getItem("orders")||"[]");
+/* GET ELEMENTS */
+const nameInput = document.getElementById("name");
+const phoneInput = document.getElementById("phone");
+const copiesInput = document.getElementById("copies");
+const typeInput = document.getElementById("type");
+const fileInput = document.getElementById("file");
+const total = document.getElementById("total");
+const ordersDiv = document.getElementById("orders");
 
-const total=document.getElementById("total");
+let orders = JSON.parse(localStorage.getItem("orders")||"[]");
 
 /* MENU */
 function toggleMenu(){
@@ -206,10 +202,10 @@ function closeTrack(){trackModal.style.display="none";}
 
 /* CALC */
 function calcTotal(){
-total.innerText=Number(copies.value)*Number(type.value);
+total.innerText = Number(copiesInput.value) * Number(typeInput.value);
 }
 
-/* FILE BASE64 */
+/* FILE */
 function getFileBase64(file){
 return new Promise((res)=>{
 let reader=new FileReader();
@@ -218,33 +214,29 @@ reader.readAsDataURL(file);
 });
 }
 
-/* ✅ FIXED VALIDATION FUNCTION */
+/* VALIDATION */
 function isValidInput(){
-let nameVal = name.value.trim();
-let phoneVal = phone.value.trim();
-
-if(nameVal === "" || phoneVal === ""){
-alert("⚠️ Please fill in all required fields correctly");
+if(nameInput.value.trim()==="" || phoneInput.value.trim()===""){
+alert("⚠️ Fill all fields");
 return false;
 }
-
 return true;
 }
 
-/* SAVE ORDER */
+/* SAVE */
 async function saveOrder(){
-
 if(!isValidInput()) return;
 
 let fileData="";
-let f=file.files[0];
-if(f){fileData=await getFileBase64(f);}
+if(fileInput.files[0]){
+fileData = await getFileBase64(fileInput.files[0]);
+}
 
 let order={
 id:"SG"+Date.now(),
-name:name.value.trim(),
-phone:phone.value.trim(),
-price:Number(copies.value)*Number(type.value),
+name:nameInput.value,
+phone:phoneInput.value,
+price:Number(copiesInput.value)*Number(typeInput.value),
 file:fileData,
 status:"Saved"
 };
@@ -252,24 +244,24 @@ status:"Saved"
 orders.push(order);
 localStorage.setItem("orders",JSON.stringify(orders));
 
-alert("✅ Order Saved");
+alert("✅ Saved!");
 render();
 }
 
-/* 🚀 FIXED SUBMIT ORDER */
+/* SUBMIT */
 async function continueOrder(){
-
 if(!isValidInput()) return;
 
 let fileData="";
-let f=file.files[0];
-if(f){fileData=await getFileBase64(f);}
+if(fileInput.files[0]){
+fileData = await getFileBase64(fileInput.files[0]);
+}
 
 let order={
 id:"SG"+Date.now(),
-name:name.value.trim(),
-phone:phone.value.trim(),
-price:Number(copies.value)*Number(type.value),
+name:nameInput.value,
+phone:phoneInput.value,
+price:Number(copiesInput.value)*Number(typeInput.value),
 file:fileData,
 status:"Pending"
 };
@@ -277,25 +269,30 @@ status:"Pending"
 orders.push(order);
 localStorage.setItem("orders",JSON.stringify(orders));
 
-/* ONLY opens if valid */
 window.open(`https://wa.me/264813353232?text=NEW ORDER%0A${order.name}%0A${order.phone}%0A${order.price}`);
 
+alert("🚀 Order Submitted!");
 render();
 }
 
 /* TRACK */
 function trackOrder(){
-let results=orders.filter(o=>o.phone.includes(trackPhone.value));
-trackResult.innerHTML=results.length?results.map(o=>`
+let phone = document.getElementById("trackPhone").value;
+let result = document.getElementById("trackResult");
+
+let found = orders.filter(o=>o.phone.includes(phone));
+
+result.innerHTML = found.length ? found.map(o=>`
 <div class="card">
 <b>${o.id}</b><br>${o.name}<br>${o.status}<br>N$${o.price}
-</div>`).join(""):"❌ No orders";
+</div>`).join("") : "❌ No orders";
 }
 
 /* ADMIN */
 function openAdmin(){
-if(prompt("Admin Password")==="1234"){
-adminModal.style.display="flex";render();
+if(prompt("Password") === "1234"){
+adminModal.style.display="flex";
+render();
 }
 }
 function closeAdmin(){adminModal.style.display="none";}
@@ -304,7 +301,6 @@ function closeAdmin(){adminModal.style.display="none";}
 function render(){
 ordersDiv.innerHTML="";
 orders.forEach((o,i)=>{
-
 ordersDiv.innerHTML+=`
 <div class="card">
 <b>${o.name}</b><br>
@@ -318,7 +314,7 @@ N$${o.price}<br>
 <option ${o.status=="Completed"?"selected":""}>Completed</option>
 </select>
 
-${o.file ? `<a href="${o.file}" download="file_${o.id}">📥 File</a>`:""}
+${o.file ? `<a href="${o.file}" download>📥 File</a>`:""}
 
 <button onclick="downloadFilePDF(${i})">📄 File PDF</button>
 <button onclick="sendWhatsApp(${i})">📱 WhatsApp</button>
@@ -329,37 +325,32 @@ ${o.file ? `<a href="${o.file}" download="file_${o.id}">📥 File</a>`:""}
 });
 }
 
-/* DOWNLOAD FILE PDF */
-function downloadFilePDF(i){
-let o=orders[i];
-if(!o.file){alert("No file");return;}
-
-let el=document.createElement("div");
-el.innerHTML=`<img src="${o.file}" style="width:100%">`;
-html2pdf().from(el).save("file.pdf");
-}
-
-/* WHATSAPP */
-function sendWhatsApp(i){
-let o=orders[i];
-window.open(`https://wa.me/${o.phone}?text=Order Update%0A${o.name}%0A${o.status}`);
-}
-
-/* STATUS */
+/* OTHER */
 function status(i,v){
 orders[i].status=v;
 localStorage.setItem("orders",JSON.stringify(orders));
 render();
 }
 
-/* DELETE */
 function deleteOrder(i){
 orders.splice(i,1);
 localStorage.setItem("orders",JSON.stringify(orders));
 render();
 }
 
-/* INVOICE */
+function downloadFilePDF(i){
+let o=orders[i];
+if(!o.file){alert("No file");return;}
+let el=document.createElement("div");
+el.innerHTML=`<img src="${o.file}" style="width:100%">`;
+html2pdf().from(el).save("file.pdf");
+}
+
+function sendWhatsApp(i){
+let o=orders[i];
+window.open(`https://wa.me/${o.phone}?text=Order Update%0A${o.name}%0A${o.status}`);
+}
+
 function invoice(i){
 let o=orders[i];
 let el=document.createElement("div");
@@ -370,10 +361,6 @@ html2pdf().from(el).save("invoice.pdf");
 render();
 calcTotal();
 
-</script>
-
-<script>
-const ordersDiv=document.getElementById("orders");
 </script>
 
 </body>
